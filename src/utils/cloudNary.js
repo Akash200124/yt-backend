@@ -11,23 +11,19 @@ import fs from 'fs'
 const uploadOnCloudinary = async (localFilePath) =>{
 
     try {
-        if(!localFilePath) return null 
+        if(!localFilePath) return null ;
         //upload the file to cloudinary 
-        await cloudinary.
+        const uploadResult= await cloudinary.uploader.upload(localFilePath,{
+            resource_type: "auto",
+        });
+        // file has been uploaded sucessfully 
+        console.log("file uploaded sucessfully",uploadResult.url);
+        return uploadResult ;
         
     } catch (error) {
-        
+        fs.unlinkSync(localFilePath) // removed locally saved temparty file as the response failed 
+        return null ;
     }
 }
 
-const uploadResult = await cloudinary.uploader
-.upload(
-    'https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg', {
-        public_id: 'shoes',
-    }
-)
-.catch((error) => {
-    console.log(error);
-});
-
-console.log(uploadResult);
+export {uploadOnCloudinary}
