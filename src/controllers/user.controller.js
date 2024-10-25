@@ -49,7 +49,7 @@ const registerUser = asynHandler( async (req, res) => {
    }  
 
    // add in database 
-   User.create({
+  const user = await  User.create({
        fullname,
        email,
        usrname :usrname.toLowerCase(),
@@ -58,5 +58,6 @@ const registerUser = asynHandler( async (req, res) => {
        coverImage: uploadedcoverImage?.url || ""
    })
 
+   // now 
 
-export  { registerUser} ;
+export  { registerUser} 

@@ -52,12 +52,12 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre("save", async function(next) {
     if(!this.ismodified('password')) return next();
-    this.password = bcrtpt.hash(this.password,10)
+    this.password = awaitbcrtpt.hash(this.password,10)
     next()
 })
 
 userSchema.methods.ispasswordCorrect = async function name(password) {
-    return  await  bcrtpt.compare(password, this.password)
+    return  await bcrtpt.compare(password, this.password)
 }
 
 userSchema.methods.generateAccessToken =  function() {
