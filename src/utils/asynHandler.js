@@ -14,9 +14,9 @@
 // }
 
 const asynHandler = (fun) => {
-    (res, req, next) => {
+    return (req,res,  next) => {
         Promise.resolve(fun(req, res, next)).catch((err) => next.err)
     }
 }
 
-export default { asynHandler }
+export default  asynHandler 
