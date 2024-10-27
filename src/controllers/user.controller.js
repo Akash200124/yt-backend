@@ -1,7 +1,7 @@
 import asynHandler from "../utils/asynHandler.js"
-import apiError from "../utils/apiError.js"
+import {apiError} from "../utils/apiError.js"
 import { User } from "../models/user.modal.js"
-import uploadOnCloudinary from "../utils/cloudNary.js"
+import {uploadOnCloudinary} from "../utils/cloudNary.js"
 import {ApiResponse} from "../utils/apiResponse.js"
 
 const registerUser = asynHandler( async (req, res) => {
@@ -18,7 +18,8 @@ const registerUser = asynHandler( async (req, res) => {
 
     //1 
    const  {fullname, email,usrname, password} =  req.body
-   console.log("email:",email);
+    console.log("body:", req.body);
+    console.log("files:", req.files);
 
    if([fullname, email, usrname, password].some((field)=> field?.trim() === "")){
        throw new apiError(400, "All fields are required")
@@ -45,6 +46,8 @@ const registerUser = asynHandler( async (req, res) => {
    const uploadedAvatar =   await uploadOnCloudinary(avatarLocalPath);
    const uploadedcoverImage =  await uploadOnCloudinary(coverImageLocalPath);
 
+
+   console.log("uploadedAvatar",uploadedAvatar);
    if(!uploadedAvatar || !uploadedcoverImage){
        throw new apiError(400, "Image upload failed")
    }  
@@ -53,7 +56,7 @@ const registerUser = asynHandler( async (req, res) => {
   const user = await  User.create({
        fullname,
        email,
-       usrname :usrname.toLowerCase(),
+       username :usrname.toLowerCase(),
        password,
        avatar: uploadedAvatar.url,
        coverImage: uploadedcoverImage?.url || ""
@@ -73,7 +76,7 @@ const registerUser = asynHandler( async (req, res) => {
 return res.status(201).json(
     new ApiResponse(
         200,
-        createdUser 
+        createdUser ,
         "User created successfully",
     )
 )
