@@ -2,6 +2,7 @@ import asynHandler from "../utils/asynHandler.js"
 import apiError from "../utils/apiError.js"
 import { User } from "../models/user.modal.js"
 import uploadOnCloudinary from "../utils/cloudNary.js"
+import {ApiResponse} from "../utils/apiResponse.js"
 
 const registerUser = asynHandler( async (req, res) => {
    
@@ -17,7 +18,7 @@ const registerUser = asynHandler( async (req, res) => {
 
     //1 
    const  {fullname, email,usrname, password} =  req.body
-   console.log("email:",email)
+   console.log("email:",email);
 
    if([fullname, email, usrname, password].some((field)=> field?.trim() === "")){
        throw new apiError(400, "All fields are required")
@@ -58,6 +59,27 @@ const registerUser = asynHandler( async (req, res) => {
        coverImage: uploadedcoverImage?.url || ""
    })
 
-   // now 
+   // now check user is created or not 
+ const createdUser =    await User.findById(user._id).select(
+    "-password -refreshtoken"
+    // write what you want to remove from the response
+ )
+//
+ if(!createdUser){
+    throw new apiError(400, "User creation failed")
+ }
 
-export  { registerUser} 
+// return response  
+return res.status(201).json(
+    new ApiResponse(
+        200,
+        createdUser 
+        "User created successfully",
+    )
+)
+
+})
+
+export  { 
+    registerUser,
+} 
