@@ -232,14 +232,151 @@ const refreshAccessToken = asynHandler(async (req, res) => {
                 )
             )
     } catch (error) {
-        throw new apiError(401,error?.message || "Invalid refresh token ")
+        throw new apiError(401, error?.message || "Invalid refresh token ")
     }
 
 })
 
+const changeCurrentPassword = asynHandler(async (req, res) => {
+
+    const { currentPassword, newPassword } = req.body;
+
+    // db call 
+    const user = await User.findById(req.user?.id); // this user is form middleware 
+
+
+    const isPasswordCorrect = await user.ispasswordCorrect(currentPassword);
+
+    if (!isPasswordCorrect) {
+        throw new apiError(400, "Invalid old password")
+    }
+
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Password changed successfully"
+            )
+        )
+})
+
+const getCurrentUser = asynHandler(async (req, res) => {
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: req.user
+                },
+                "User fetched successfully"
+            )
+        )
+
+})
+
+const updateAccountDetails = asynHandler(async (req, res) => {
+    const { fullname, email } = req.body;
+
+    if (!fullname || !email) {
+        throw new apiError(400, "Please provide fullname and email");
+    }
+
+   const user = await User.findByIdAndUpdate(req.user?._id,
+        {
+            $set:{
+                fullname :fullname,
+                email:email.toLowerCase()
+            }
+        },
+        {
+            new:true
+        }
+    ).select("-password")
+
+    return res.status(200)
+        .json(
+            new apiResponse(
+                200,
+                user,
+                "User Account details updated successfully"
+            )
+        )
+})
+
+const updateUserAvatar = asynHandler(async (req, res) => {
+    const avatarLocalpath =  req.file?.path ;
+
+    if(!avatarLocalpath){   
+        throw new apiError(400, "Please provide avatar");
+    }
+    const avatarUrl = await uploadOnCloudinary(avatarLocalpath);
+
+    if(!avatarUrl.url){
+        throw new apiError(500, "Something went wrong while uploading avatar");
+    }
+
+    const user = await User.findByIdAndUpdate(req.user?._id,
+        {
+            $set:{
+                avatar: avatarUrl.url
+            }
+        },
+        {
+            new:true
+        }
+    ).select("-password")
+
+    return res.status(200)
+    .json(
+        200,
+        user,
+        "User avatar updated successfully"
+    )
+})
+
+const updateUserConverImage = asynHandler(async (req, res) => {
+    const coverLocalpath =  req.file?.path ;
+
+    if(!coverLocalpath){   
+        throw new apiError(400, "Please provide coverImage");
+    }
+    const coverImage = await uploadOnCloudinary(coverLocalpath);
+
+    if(!coverImage.url){
+        throw new apiError(500, "Something went wrong while uploading avatar");
+    }
+
+    const user = await User.findByIdAndUpdate(req.user?._id,
+        {
+            $set:{
+                coverImage: coverImage.url
+            }
+        },
+        {
+            new:true
+        }
+    ).select("-password")
+
+    return res.status(200)
+    .json(
+        200,
+        user,
+        "User cover image updated successfully"
+    )
+})
 export {
     registerUser,
     loginUser,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    getCurrentUser,
+    changeCurrentPassword,
+    updateAccountDetails,
+    updateUserAvatar,
+    updateUserConverImage
 } 
