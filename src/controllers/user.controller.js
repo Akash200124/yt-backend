@@ -1,6 +1,6 @@
 import asynHandler from "../utils/asynHandler.js"
 import { apiError } from "../utils/apiError.js"
-import { User } from "../models/user.modal.js"
+import { User  } from "../models/user.modal.js"
 import { uploadOnCloudinary } from "../utils/cloudNary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import jwt from "jsonwebtoken";
@@ -12,6 +12,8 @@ const generateAccessAndRefressTokens = async (userId) => {
         const refreshToken = user.generateRefreshToken();
 
         user.refreshToken = refreshToken;
+        
+
         await user.save({ validateBeforeSave: false });
         return { acessToken, refreshToken }
 
@@ -20,7 +22,7 @@ const generateAccessAndRefressTokens = async (userId) => {
     }
 }
 
-const registerUser = asynHandler(async (req, res) => {
+const registerUser = asynHandler( async (req, res) => {
 
     //get user details from frontend 
     // valition of data 
@@ -125,12 +127,13 @@ const loginUser = asynHandler(async (req, res) => {
     const isPasswordValid = await user.ispasswordCorrect(password);
 
     if (!isPasswordValid) {
-        throw new apiError(400, "Invalid user creadentials")
+        
+        throw new apiError(401, "Invalid user creadentials")
     }
 
     const { acessToken, refreshToken } = await generateAccessAndRefressTokens(user._id);
 
-    //    console.log(acessToken, refreshToken);
+    //    console.log("refreshToken : ", refreshToken);
 
     //    db call for user  
     const loggedInUser = await User.findById(user._id).select(
@@ -196,16 +199,22 @@ const logoutUser = asynHandler(async (req, res) => {
 
 const refreshAccessToken = asynHandler(async (req, res) => {
 
+    // console.log("incomingRefreshToken",incomingRefreshToken);
+
+
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+
     if (!incomingRefreshToken) {
         throw new apiError(401, "Unauthorized request");
     }
     try {
         const descodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
 
+        console.log("descodedToken", descodedToken._id);
         // check user 
         const user = await User.findById(descodedToken?._id);
-        if (user) {
+
+        if (!user) {
             throw new apiError(401, "Invalid refresh token ");
         }
 
@@ -239,11 +248,14 @@ const refreshAccessToken = asynHandler(async (req, res) => {
 
 const changeCurrentPassword = asynHandler(async (req, res) => {
 
+    // console.log("req.user:",req.user, "req.body:", req.body)
     const { currentPassword, newPassword } = req.body;
+    
 
     // db call 
     const user = await User.findById(req.user?.id); // this user is form middleware 
 
+    console.log("user:",user)
 
     const isPasswordCorrect = await user.ispasswordCorrect(currentPassword);
 
@@ -286,29 +298,38 @@ const updateAccountDetails = asynHandler(async (req, res) => {
         throw new apiError(400, "Please provide fullname and email");
     }
 
-    const user = await User.findByIdAndUpdate(req.user?._id,
-        {
-            $set: {
-                fullname: fullname,
-                email: email.toLowerCase()
-            }
-        },
-        {
-            new: true
-        }
-    ).select("-password")
+    let user ;
+  try {
+       user = await User.findByIdAndUpdate(req.user?._id,
+          {
+              $set: {
+                  fullname: fullname,
+                  email: email.toLowerCase()
+              }
+          },
+          {
+              new: true
+          }
+      ).select("-password")
+   
 
-    return res.status(200)
-        .json(
-            new apiResponse(
-                200,
-                user,
-                "User Account details updated successfully"
-            )
-        )
+  } catch (error) {
+    throw new apiError(409, "User alredy exist with this email", error);
+  }
+
+  return res.status(200)
+  .json(
+      new ApiResponse(
+          200,
+          user,
+          "User Account details updated successfully"
+      )
+  )
+ 
 })
 
 const updateUserAvatar = asynHandler(async (req, res) => {
+
     const avatarLocalpath = req.file?.path;
 
     if (!avatarLocalpath) {
@@ -319,6 +340,8 @@ const updateUserAvatar = asynHandler(async (req, res) => {
     if (!avatarUrl.url) {
         throw new apiError(500, "Something went wrong while uploading avatar");
     }
+
+    console.log("avatarUrl:", avatarUrl.url)
 
     const user = await User.findByIdAndUpdate(req.user?._id,
         {
@@ -331,12 +354,13 @@ const updateUserAvatar = asynHandler(async (req, res) => {
         }
     ).select("-password")
 
+    console.log("user:", user);
     return res.status(200)
-        .json(
+        .json (new ApiResponse(
             200,
             user,
             "User avatar updated successfully"
-        )
+        ))
 })
 
 const updateUserConverImage = asynHandler(async (req, res) => {
@@ -363,15 +387,17 @@ const updateUserConverImage = asynHandler(async (req, res) => {
     ).select("-password")
 
     return res.status(200)
-        .json(
+        .json ( new ApiResponse(
             200,
             user,
             "User cover image updated successfully"
-        )
+        ))
 })
 
 const getUserChannelProfile = asynHandler(async (req, res) => {
     const { username } = req.params;
+
+    console.log("username:", username)
 
     if (!username?.trim()) {
         throw new apiError(400, "Please provide username");

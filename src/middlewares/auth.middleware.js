@@ -1,30 +1,33 @@
-import {apiError}  from "../utils/apiError.js"
+import { apiError } from "../utils/apiError.js"
 import asynHandler from "../utils/asynHandler.js"
 import jwt from "jsonwebtoken";
-import {User} from "../models/user.modal.js"
+import { User } from "../models/user.modal.js"
 
-export const verifyJwt = asynHandler( async (req, res, next) => {
-    
+export const verifyJwt = asynHandler(async (req, res, next) => {
+
   try {
-    const token =   req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
- 
-    if(!token){
-     throw new apiError(401, "Unauthorized request")
+    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+
+
+    if (!token) {
+      throw new apiError(401, "Unauthorized request")
     }
- 
-    const descodedToken  = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) ;
- 
-     const  user =   User.findById(descodedToken?._id).select("-password -refreshToken");
- 
-     // Discuss about the frontend 
-     if(!user){
-       throw apiError(401, "Unauthorized access token ")
-     }
- 
-     req.user = user;
-     next();
+
+    const descodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    const user = await User.findById(descodedToken?._id).select("-password -refreshToken");
+
+    //  console.log("user : ", user)
+
+    // Discuss about the frontend 
+    if (!user) {
+      throw new apiError(401, "Unauthorized access token ")
+    }
+
+    req.user = user;
+    next();
 
   } catch (error) {
-      throw apiError(401, error?.message || "Unauthorized access token ")
+    throw new apiError(401, error?.message || "Unauthorized access token ")
   }
 })

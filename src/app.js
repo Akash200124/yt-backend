@@ -30,4 +30,15 @@ app.use("/api/v1/users",userRouter);
 
 // http://localhost:8000/api/v1/users/register
 
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    
+    res.status(err.statusCode || 500).json({
+      success: err.success,
+      message: err.message,
+      errors: err.errors,
+      data: err.data
+    });
+  });
+
 export { app }
