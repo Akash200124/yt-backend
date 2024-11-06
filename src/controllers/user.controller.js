@@ -4,6 +4,7 @@ import { User  } from "../models/user.modal.js"
 import { uploadOnCloudinary } from "../utils/cloudNary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import jwt from "jsonwebtoken";
+import fs from 'fs'
 
 const generateAccessAndRefressTokens = async (userId) => {
     try {
@@ -37,7 +38,7 @@ const registerUser = asynHandler( async (req, res) => {
     //1 
     const { fullname, email, usrname, password } = req.body
     console.log("body:", req.body);
-    console.log("files:", req.files);
+    // console.log("files:", req.files);
 
     if ([fullname, email, usrname, password].some((field) => field?.trim() === "")) {
         throw new apiError(400, "All fields are required")
@@ -45,11 +46,16 @@ const registerUser = asynHandler( async (req, res) => {
 
     // check user exits in the db or not 
     const existingUser = await User.findOne({
-        $or: [{ email }, { usrname }]
+        $or: [{ email: email }, { username: usrname }]
     })
 
+    
+
     if (existingUser) {
+        fs.unlinkSync(req.files?.avatar[0]?.path);
+        fs.unlinkSync(req.files?.coverImage[0]?.path);
         throw new apiError(400, "User already exists with email or username")
+        
     }
 
     // check for images and check for avtar
@@ -66,6 +72,7 @@ const registerUser = asynHandler( async (req, res) => {
 
 
     console.log("uploadedAvatar", uploadedAvatar);
+
     if (!uploadedAvatar || !uploadedcoverImage) {
         throw new apiError(400, "Image upload failed")
     }
