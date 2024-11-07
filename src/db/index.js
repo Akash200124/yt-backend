@@ -17,8 +17,7 @@ export const connectDB = async ()=>{
     } catch (error) {
         console.log("error in db connection :"+ error);
         process.exit(1);
-        
-        
+           
     }
 }
 

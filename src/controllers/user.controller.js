@@ -127,7 +127,7 @@ const loginUser = asynHandler(async (req, res) => {
     })
 
     if (!user) {
-        throw new apiError(400, "User does not exist")
+        throw new apiError(404, "User does not exist")
     }
 
     // check password 
@@ -175,8 +175,8 @@ const logoutUser = asynHandler(async (req, res) => {
 
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -401,7 +401,7 @@ const updateUserConverImage = asynHandler(async (req, res) => {
         ))
 })
 
-const getUserChannelProfile = asynHandler(async (req, res) => {
+const getUserChannelProfile = asynHandler( async (req, res) => {
     const { username } = req.params;
 
     console.log("username:", username)
@@ -444,9 +444,10 @@ const getUserChannelProfile = asynHandler(async (req, res) => {
                 },
                 isSubcribed: {
                     $cond: {
-                        if: { $in: [req.user?._id, "$subscriptions.subscriber"] },
+                        if: {  $in: [req.user?._id, "$subscribers.subscriber"] },
                         then: true,
                         else: false
+                        
                     }
                 }
 
