@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import { publishAVideo } from '../controllers/video.controller.js';
-import {verifyJwt} from '../middlewares/auth.middleware.js'
 import { upload } from '../middlewares/multer.middleware.js';
+import { verifyJwt } from "../middlewares/auth.middleware.js"
 
 
 

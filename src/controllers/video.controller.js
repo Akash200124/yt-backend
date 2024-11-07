@@ -1,6 +1,6 @@
 import asynHandler from "../utils/asynHandler.js"
 import { ApiResponse } from "../utils/apiResponse.js"
-import apiError from "../utils/apiError.js"
+import {apiError} from "../utils/apiError.js"
 import { Video } from "../models/video.modal.js"
 import { uploadOnCloudinary } from "../utils/cloudNary.js"
 
@@ -17,6 +17,9 @@ const publishAVideo = asynHandler(async (req, res) => {
 
     const { description, title } = req.body;
 
+
+    console.log("thumnail : ",req.files?.thumnail);
+    console.log("video :",req.files?.videoFile);
     // check for thumnail and video file 
     const thumnailLocalPath = req.files?.thumnail[0]?.path;
     const videoLocalPath = req.files?.videoFile[0]?.path;
@@ -31,6 +34,9 @@ const publishAVideo = asynHandler(async (req, res) => {
     // upload on cloudnary 
     const uploadedThumnail = await uploadOnCloudinary(thumnailLocalPath);
     const uploadedVideo = await uploadOnCloudinary(videoLocalPath);
+
+    console.log("uploaded thrumnail : ",uploadedThumnail);
+    console.log("uploaded video : ",uploadedVideo);
 
     if (!uploadedThumnail || !uploadedVideo) {
         throw new apiError(500, "something went wrong while uploading ")
