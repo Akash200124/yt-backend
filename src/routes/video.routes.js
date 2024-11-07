@@ -1,13 +1,27 @@
 import {Router} from 'express';
-import { uploadVideo } from '../controllers/video.controller.js';
+import { publishAVideo } from '../controllers/video.controller.js';
 import {verifyJwt} from '../middlewares/auth.middleware.js'
+import { upload } from '../middlewares/multer.middleware.js';
 
 
 
 const router = Router();
 
 
+
+router.use(verifyJwt) ; // add middleware to secure all the routes below
 // all routes are secure here 
-router.route("/upload-video").post(verifyJwt, uploadVideo);
+router.route("/upload-video").post(
+    upload.fields([
+        {
+            name: "thumnail",
+            maxCount: 1
+        },
+        {
+            name : "videoFile",
+            maxCount : 1
+        }
+    ])
+    , publishAVideo);
 
 export default router;
