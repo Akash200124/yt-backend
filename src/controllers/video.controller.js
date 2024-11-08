@@ -73,7 +73,30 @@ const publishAVideo = asynHandler(async (req, res) => {
     )
 })
 
+const getVideoByID = asynHandler(async(req,res) =>{
+const { videoId } = req.body;
+
+const video =  await Video.findById(videoId);
+ 
+if(!video) {
+    throw new apiError(400, "something went wrong in video fetching");
+}
+
+res.status(200)
+.json(
+    new ApiResponse(
+        200,
+        video,
+        "video get successfully"
+    )
+)
+
+})
+
+
+
 
 export {
-    publishAVideo
+    publishAVideo,
+    getVideoByID
 }
