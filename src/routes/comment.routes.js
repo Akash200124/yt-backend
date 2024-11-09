@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { verifyjwt } from "../middlewares/auth.middleware.js";
+// import { verifyjwt } from "../middlewares/auth.middleware.js";
+import { verifyJwt } from "../middlewares/auth.middleware.js"
 
 import {addComments,
         updateComment,
@@ -10,7 +11,7 @@ import {addComments,
 
 const router = Router();
 
-router.use(verifyjwt) ; // apply verifyjwt middleware to all routes in this field 
+router.use(verifyJwt) ; // apply verifyjwt middleware to all routes in this field 
 
 // all routes are secure here
 router.route("/add-comment").post(addComments);

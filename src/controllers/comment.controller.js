@@ -79,6 +79,7 @@ const updateComment = asynHandler(async (req, res) => {
 
 const deleteComment = asynHandler(async (req, res) => {
 
+    // console.log("req.body : ", req.body);
     const { _id } = req.body; 
 
     if (!_id) {
@@ -125,14 +126,25 @@ const getAllVideoComments = asynHandler(async (req, res) => {
         .skip(offset)
         .limit(limit)
         .sort({createdAt: -1});
+
+    const totalCount = await Comment.countDocuments({video : videoId});
+    const totalPages = Math.ceil(totalCount / limit);
     
     res.status(200)
      .json(
-        new ApiResponse(
-         200,
-         comments,
-         "comments fetched successfully"
-        )
+
+        {
+            status: 200,
+            data: comments,
+            message: "comments fetched successfully",
+            pagination: {
+                currentPage: page,
+                totalPages,
+                limit,
+                totalCount,
+            }
+        }
+        
      )
 })
 

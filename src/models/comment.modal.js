@@ -8,12 +8,12 @@ const commentSchema = new mongoose.Schema(
             required: true,
         },
         video:{
-            type : Schema.types.ObjectId,
+            type : Schema.Types.ObjectId,
             ref : "Video",
             required : true
         },
-        Owner:{
-            type : Schema.types.ObjectId,
+        owner:{
+            type : Schema.Types.ObjectId,
             ref : "User",
             required : true
         },
