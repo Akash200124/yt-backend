@@ -52,7 +52,7 @@ const likeVideo = asynHandler(async (req, res) => {
                     new ApiResponse(
                         400,
                         "Video already liked"
-                ));
+                    ));
             }
         } else {
             // Create a new Like document if one doesn't exist for this user
@@ -79,22 +79,22 @@ const likeVideo = asynHandler(async (req, res) => {
 })
 
 const unlikeVideo = asynHandler(async (req, res) => {
-     const { videoId } = req.body;
+    const { videoId } = req.body;
 
-    if (!videoId) { 
+    if (!videoId) {
         throw new apiError(400, "video id is required")
     }
 
-    if(!mongoose.Types.ObjectId.isValid(videoId)){
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
         throw new apiError(400, "video not found")
     }
 
     const like = await Like.findOne({ likedBy: req.user._id });
 
-    if(like){
+    if (like) {
 
-        if(like.video.includes(videoId)){
-            
+        if (like.video.includes(videoId)) {
+
             const index = like.video.indexOf(videoId);
             like.video.splice(index, 1);
             await like.save();
@@ -105,26 +105,79 @@ const unlikeVideo = asynHandler(async (req, res) => {
                     "Video unliked successfully"
                 )
             )
-    } else{
+        } else {
+            res.status(400).json(
+                new ApiResponse(
+                    400,
+                    "Video not liked"
+                )
+            )
+        }
+    } else {
         res.status(400).json(
             new ApiResponse(
                 400,
-                "Video not liked"
+                "Video not liked yet by user"
             )
         )
     }
-} else{
-    res.status(400).json(
-        new ApiResponse(
-            400,
-            "Video not liked yet by user"
-        )
-    )
-}
 
 
 })
 
+const getAllLikedVideo = asynHandler(async (req, res) => {
+
+    const userId = req.user._id;
+
+    //find user in like 
+    // get all video id 
+    // from video modal get videos and send thm in response 
+
+    const videoIds = await Like.aggregate([
+        {
+          $match: {
+            likedBy: userId // Filter by user ID
+          }
+        },
+        {
+          $project: {
+            video: 1 // Only project the "video" field
+          }
+        },
+        {
+          $unwind: "$video" // Unwind to get each video ID as a separate document entry
+        },
+        {
+          $group: {
+            _id: null, // Group all video IDs together
+            allVideoIds: { $addToSet: "$video" } // Collect all unique video IDs
+          }
+        }
+      ]);
+  
+      // If no video IDs are found, send an empty array
+      const result = videoIds.length > 0 ? videoIds[0].allVideoIds : [];
+
+      const data = await Promise.all(
+        result.map(async (videoId) => {
+          const video = await Video.findById(videoId);
+          return video || null; // Ensure each call returns either a video or null
+        })
+      );
+      
+      // Filter out any null values (in case some video IDs didn't match a document)
+      const result1 = data.filter((video) => video !== null);
+
+    res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                result1,
+                "ALl Video liked by user find successfully"
+            )
+        )
+
+})
 
 // const likeComment = asynHandler(async (req, res) => {
 
@@ -231,7 +284,8 @@ const unlikeVideo = asynHandler(async (req, res) => {
 
 export {
     likeVideo,
-    unlikeVideo
+    unlikeVideo,
+    getAllLikedVideo
     // likeComment,
     // likeTweet,
     // getUserLikedVideos
