@@ -28,7 +28,7 @@ const createTweet = asynHandler(async (req, res) => {
             .json(
                 new ApiResponse(
                     200,
-                    createdTwecet,
+                    createdTweet,
                     "tweet created successfully",
                 )
             )
@@ -52,11 +52,12 @@ const updateTweet = asynHandler(async (req, res) => {
   
     const dbowner = await Tweet.findById(tweetId);
 
+    
     if(dbowner.owner.toString() !== req.user._id.toString()){
         throw new apiError(401,"unauthorized acess")
     }
 
-    const newtweet = Tweet.findByIdAndUpdate(tweetId,
+    const newtweet = await Tweet.findByIdAndUpdate(tweetId,
         {
             content
         },{
@@ -94,7 +95,7 @@ const deletTweet = asynHandler (async (req,res) =>{
         throw new apiError(400,"unauthorized access")
     }
 
-    const tweet = Tweet.findByIdAndDelete(tweetId);
+    const tweet =  await Tweet.findByIdAndDelete(tweetId);
 
     res.status(200)
       .json(
@@ -108,7 +109,7 @@ const deletTweet = asynHandler (async (req,res) =>{
 const getAllUserTweet = asynHandler(async (req,res) =>{
 
     const userid = req.user._id ;
-    const allTweets = Tweet.find({owner:userid})
+    const allTweets =  await Tweet.find({owner:userid})
 
     res.status(200)
      .json(
