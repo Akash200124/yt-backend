@@ -52,6 +52,9 @@ const updateTweet = asynHandler(async (req, res) => {
   
     const dbowner = await Tweet.findById(tweetId);
 
+    if(!dbowner){
+        throw new apiError(400,"tweet does not exists")
+    }
     
     if(dbowner.owner.toString() !== req.user._id.toString()){
         throw new apiError(401,"unauthorized acess")
