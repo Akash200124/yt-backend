@@ -62,9 +62,9 @@ const registerUser = asynHandler( async (req, res) => {
     const avatarLocalPath = req.files?.avatar[0]?.path;
     const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
-    if (!avatarLocalPath) {
-        throw new apiError(400, "Avatar is required")
-    }
+    // if (!avatarLocalPath) {
+    //     throw new apiError(400, "Avatar is required")
+    // }
 
     // upload on cloudnary 
     const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
@@ -73,9 +73,9 @@ const registerUser = asynHandler( async (req, res) => {
 
     console.log("uploadedAvatar", uploadedAvatar);
 
-    if (!uploadedAvatar || !uploadedcoverImage) {
-        throw new apiError(400, "Image upload failed")
-    }
+    // if (!uploadedAvatar || !uploadedcoverImage) {
+    //     throw new apiError(400, "Image upload failed")
+    // }
 
     // add in database 
     const user = await User.create({
@@ -83,7 +83,7 @@ const registerUser = asynHandler( async (req, res) => {
         email,
         username: usrname.toLowerCase(),
         password,
-        avatar: uploadedAvatar.url,
+        avatar: uploadedAvatar?.url || "",
         coverImage: uploadedcoverImage?.url || ""
     })
 
