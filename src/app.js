@@ -6,11 +6,13 @@ import cors from 'cors';
 const app = express();
 
 app.use(cors({
-    "origin": process.env.CORS_ORIGIN,
-    "credentials": true,
+  
+    origin: true,
+    credentials: true,
 
 }))
 
+console.log("process.env.CORS_ORIGIN",process.env.CORS_ORIGIN)
 
 // to accept json in body 
 app.use(express.json({ "limit": "16kb" }))

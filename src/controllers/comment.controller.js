@@ -110,7 +110,7 @@ const deleteComment = asynHandler(async (req, res) => {
 
 const getAllVideoComments = asynHandler(async (req, res) => {
 
-    const { videoId } = req.body;
+    const { videoId } = req.query;
 
     if (!videoId) {
         throw new apiError(400, "video id is required") 

@@ -17,16 +17,16 @@ export const verifyJwt = asynHandler(async (req, res, next) => {
       throw new apiError(401, "Unauthorized request")
     }
 
-    
-    console.log(`secret : ${process.env.ACCESS_TOKEN_SECRET}`)
-    
+
+    // console.log(`secret : ${process.env.ACCESS_TOKEN_SECRET}`)
+
     const descodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    
-    console.log("decoded token : ",descodedToken)
+
+    // console.log("decoded token : ", descodedToken)
 
     const user = await User.findById(descodedToken?._id).select("-password -refreshToken");
 
-     console.log("user : ", user)
+    // console.log("user : ", user)
 
     // Discuss about the frontend 
     if (!user) {
@@ -37,6 +37,7 @@ export const verifyJwt = asynHandler(async (req, res, next) => {
     next();
 
   } catch (error) {
+    console.log("error : ", error)
     throw new apiError(401, error?.message || "Unauthorized access token ")
   }
 })

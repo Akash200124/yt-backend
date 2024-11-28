@@ -129,6 +129,7 @@ const getAllVideos = asynHandler(async (req, res) => {
         .limit(limit)
         .sort({ createdAt: -1 });
 
+        // console.log("allVideos : ", allVideos);
 
     const totalCount = await Video.countDocuments();
     const totalPages = Math.ceil(totalCount / limit);
