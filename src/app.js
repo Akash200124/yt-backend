@@ -3,13 +3,13 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 
 import swaggerUi from "swagger-ui-express";
-import swaggerDocument from './routes/user.routes.js';
+import swaggerDocument from '../swagger-output.json' assert { type: 'json' };
 
 
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173", "http://localhost:3000"],
   credentials: true,
 
 }))

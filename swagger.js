@@ -5,7 +5,7 @@ const doc = {
     title: 'My API',
     description: 'API Documentation',
   },
-  host: 'localhost:8000', // Update with your actual host and port
+  host: 'localhost:8000', 
   schemes: ['http'], // Use https if your API runs on https
 };
 
