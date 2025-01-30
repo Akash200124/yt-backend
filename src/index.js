@@ -52,13 +52,6 @@ connectDB()
 
 
 
-
-
-
-
-
-
-
 // other approach 
 /*
 ; (async () => {
